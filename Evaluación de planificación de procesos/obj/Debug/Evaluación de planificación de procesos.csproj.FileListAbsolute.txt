@@ -1,0 +1,10 @@
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\bin\Debug\Evaluación de planificación de procesos.exe.config
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\bin\Debug\Evaluación de planificación de procesos.exe
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\bin\Debug\Evaluación de planificación de procesos.pdb
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación de planificación de procesos.csprojResolveAssemblyReference.cache
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación_de_planificación_de_procesos.Form1.resources
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación_de_planificación_de_procesos.Properties.Resources.resources
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación de planificación de procesos.csproj.GenerateResource.Cache
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación de planificación de procesos.csproj.CoreCompileInputs.cache
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación de planificación de procesos.exe
+c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación de planificación de procesos.pdb
