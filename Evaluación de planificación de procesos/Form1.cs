@@ -22,6 +22,30 @@ namespace Evaluación_de_planificación_de_procesos
                 this.TextAlign = ContentAlignment.MiddleCenter;
                 this.Text = num.ToString();
             }
+
+            //Labels para diagrmas de Gantt
+            public LabelTabla(Proceso proceso, int timeProcesa)
+            {
+                this.Size = new Size(30 * proceso.tiempoProcesamiento, 82);
+                this.Margin = new Padding(0);
+                this.BorderStyle = BorderStyle.FixedSingle;
+                this.TextAlign = ContentAlignment.MiddleCenter;
+                this.Text = "P" + proceso.numeroProceso;
+
+                ToolTip message = new ToolTip();
+                message.SetToolTip(this, "Tiempo total procesamiento = " + proceso.tiempoProcesamiento);
+
+                this.Controls.Add(new LabelTabla(timeProcesa, 30 * proceso.tiempoProcesamiento));
+            }
+
+            //Label de subíndice dentro de los Labels de procesos del diagrama de Gantt
+            private LabelTabla(int tiempo, int width)
+            {
+                this.Font = new Font("Microsoft Office Preview Font", 9);
+                this.Text = tiempo.ToString();
+                this.TextAlign = ContentAlignment.BottomRight;
+                this.Size = new Size(width, 15);
+            }
         }
 
         public class Proceso
@@ -55,6 +79,7 @@ namespace Evaluación_de_planificación_de_procesos
             InitializeComponent();
         }
 
+        //Llena la tabla para FCFS
         private void btnGenerarProcesos_Click(object sender, EventArgs e)
         {
             //Si se presiona el botón con los mismos valores que ya se calcularon no se debe de hacer nada
@@ -93,6 +118,12 @@ namespace Evaluación_de_planificación_de_procesos
                         labelTiempo.BackColor = Color.FromArgb(96, 192, 205);
                     }
                 }
+                flPanelGanttFCFS.Controls.Clear();
+                flPanelGanttSJF.Controls.Clear();
+                flPanelGanttLJF.Controls.Clear();
+                flPanelGanttRR.Controls.Clear();
+
+                calcularPromediosFCFS(0);
 
                 panelActivo[0] = true;
                
@@ -105,6 +136,7 @@ namespace Evaluación_de_planificación_de_procesos
             }
         }
 
+        //Llenas las tablas SJF, LJF, RR
         public void llenarTabla(ref FlowLayoutPanel contenedorTabla, List<Proceso> procesos)
         {
             for (int i = 0; i < numProcesos; i++)
@@ -171,6 +203,67 @@ namespace Evaluación_de_planificación_de_procesos
             }
         }
 
+        //Cálculo de Cmax, tiempo promedo de espera y tiempo promedio de respuesta de todos los algoritmos y hacer diagramas de Gantt
+        //FCFS, SJF o LJF dependiendo del numero enviado
+        private void calcularPromediosFCFS(int panel)   //0 = FCFS      1 = SJF       2 = LJF 
+        {
+            int cmax = 0;
+            int totalEspera = 0;
+            int siguiente = 0;
+
+            int totalRespuesta = 0;
+
+            for (int i = 0; i < numProcesos; i++)
+            {
+                //De esta forma se deja fuera la suma del último elemento porque el primero no espera nada
+                totalEspera += siguiente;
+                siguiente += tiempoProcesos[i].tiempoProcesamiento;
+
+                cmax += tiempoProcesos[i].tiempoProcesamiento;
+
+                totalRespuesta += siguiente;
+                Console.WriteLine(totalRespuesta);
+
+                if(panel == 0)
+                {
+                    flPanelGanttFCFS.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax));
+                }
+                else if(panel == 1)
+                {
+                    flPanelGanttSJF.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax));
+                }
+                else
+                {
+                    flPanelGanttLJF.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax));
+                }
+            }
+
+            if (panel == 0)
+            {
+                //Para hacer que se active el scroll horizontal en lugar de que crezca el panel a lo alto
+                flPanelGanttFCFS.WrapContents = false;
+                lblCmax.Text = "Cmax: " + cmax;
+                lblPromEspera.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
+                lblPromRespuesta.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+            }
+            else if (panel == 1)
+            {
+                //Para hacer que se active el scroll horizontal en lugar de que crezca el panel a lo alto
+                flPanelGanttSJF.WrapContents = false;
+                lblCmaxSJF.Text = "Cmax: " + cmax;
+                lblEsperaSJF.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
+                lblRespuestaSJF.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+            }
+            else
+            {
+                //Para hacer que se active el scroll horizontal en lugar de que crezca el panel a lo alto
+                flPanelGanttLJF.WrapContents = false;
+                lblCmaxLJF.Text = "Cmax: " + cmax;
+                lblEsperaLJF.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
+                lblRespuestaLJF.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+            }
+        }
+
         private void flpTablaLJF_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (flpTabla.SelectedIndex == 1)
@@ -179,6 +272,7 @@ namespace Evaluación_de_planificación_de_procesos
                 {
                     ordenarProceosMenorAMayor();
                     llenarTabla(ref flpTablaSJF, tiempoProcesos);
+                    calcularPromediosFCFS(1);
                     panelActivo[1] = true;
                 }
             }
@@ -188,6 +282,7 @@ namespace Evaluación_de_planificación_de_procesos
                 {
                     ordenarProceosMayorAMenor();
                     llenarTabla(ref flpTablaLJF, tiempoProcesos);
+                    calcularPromediosFCFS(2);
                     panelActivo[2] = true;
                 }
             }
