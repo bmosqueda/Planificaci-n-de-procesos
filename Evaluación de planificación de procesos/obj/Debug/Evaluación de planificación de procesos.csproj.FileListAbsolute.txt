@@ -8,3 +8,4 @@ c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluació
 c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación de planificación de procesos.csproj.CoreCompileInputs.cache
 c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación de planificación de procesos.exe
 c:\users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación de planificación de procesos.pdb
+C:\Users\brand\source\repos\Evaluación de planificación de procesos\Evaluación de planificación de procesos\obj\Debug\Evaluación_de_planificación_de_procesos.Quantum.resources

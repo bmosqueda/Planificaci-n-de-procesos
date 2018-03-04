@@ -11,6 +11,7 @@ namespace Evaluación_de_planificación_de_procesos
         private bool[] panelActivo;
         private int numProcesos;
         private int timeMax;
+        public int Quantum;
 
         /// <summary>Clase que genera labels especiales para las tablas</summary>
         public class LabelTabla : Label
@@ -26,16 +27,33 @@ namespace Evaluación_de_planificación_de_procesos
             //Labels para diagrmas de Gantt
             public LabelTabla(Proceso proceso, int timeProcesa)
             {
-                this.Size = new Size(30 * proceso.tiempoProcesamiento, 82);
+                this.Size = new Size(40 * proceso.tiempoProcesamiento, 82);
                 this.Margin = new Padding(0);
                 this.BorderStyle = BorderStyle.FixedSingle;
                 this.TextAlign = ContentAlignment.MiddleCenter;
                 this.Text = "P" + proceso.numeroProceso;
+                this.Margin = new Padding(0,10,0,0);
 
                 ToolTip message = new ToolTip();
                 message.SetToolTip(this, "Tiempo total procesamiento = " + proceso.tiempoProcesamiento);
 
-                this.Controls.Add(new LabelTabla(timeProcesa, 30 * proceso.tiempoProcesamiento));
+                this.Controls.Add(new LabelTabla(timeProcesa, 40 * proceso.tiempoProcesamiento));
+            }
+
+            //Para RoundRobin
+            public LabelTabla(int numProceso, int tiempoProcesamiento, int indice)
+            {
+                this.Size = new Size(40 * tiempoProcesamiento, 82);
+                this.Margin = new Padding(0);
+                this.BorderStyle = BorderStyle.FixedSingle;
+                this.TextAlign = ContentAlignment.MiddleCenter;
+                this.Text = "P" + numProceso;
+                this.Margin = new Padding(0, 10, 0, 0);
+
+                //ToolTip message = new ToolTip();
+                //message.SetToolTip(this, "Tiempo total procesamiento = " + proceso);
+
+                this.Controls.Add(new LabelTabla(indice, 40 * tiempoProcesamiento));
             }
 
             //Label de subíndice dentro de los Labels de procesos del diagrama de Gantt
@@ -66,6 +84,7 @@ namespace Evaluación_de_planificación_de_procesos
             panelActivo = new bool[4];
             numProcesos = 0;
             timeMax = 0;
+            this.Quantum = 1;
 
             //FirstComeFirstServed
             panelActivo[0] = false;
@@ -187,6 +206,7 @@ namespace Evaluación_de_planificación_de_procesos
             }
         }
 
+        //Para Round Robin
         public void ordenarPorNumeroDeProceso()
         {
             for (int i = 0; i < numProcesos - 1; i++)
@@ -210,7 +230,6 @@ namespace Evaluación_de_planificación_de_procesos
             int cmax = 0;
             int totalEspera = 0;
             int siguiente = 0;
-
             int totalRespuesta = 0;
 
             for (int i = 0; i < numProcesos; i++)
@@ -264,6 +283,44 @@ namespace Evaluación_de_planificación_de_procesos
             }
         }
 
+        private void calcularPromediosRR()
+        {
+            //Para recuperar los valores al final
+            Proceso[] listRoundRobin = tiempoProcesos.ToArray();
+            int totalEspera = 0;
+            int totalRespuesta = 0;
+            int cmax = 0;
+            int indices = numProcesos;
+
+            for( int i = 0; i < numProcesos; i++ )
+            {
+                for( int j = 0; j < indices; j++ )
+                {
+                    if (tiempoProcesos[j].tiempoProcesamiento> this.Quantum)
+                    {
+                        cmax += this.Quantum;
+                        LabelTabla labelRR = new LabelTabla(tiempoProcesos[j].numeroProceso, this.Quantum, cmax);
+                        tiempoProcesos[j].tiempoProcesamiento -= this.Quantum;
+                        flPanelGanttRR.Controls.Add(labelRR);
+                    }
+                    else
+                    {
+                        cmax += tiempoProcesos[j].tiempoProcesamiento;
+                        LabelTabla labelRR = new LabelTabla(tiempoProcesos[j].numeroProceso, tiempoProcesos[j].tiempoProcesamiento, cmax);
+                        tiempoProcesos.RemoveAt(j);
+                        indices--;
+                        flPanelGanttRR.Controls.Add(labelRR);
+                    }
+                }
+                indices = tiempoProcesos.Count;
+            }
+            tiempoProcesos = new List<Proceso>(listRoundRobin);
+            flPanelGanttRR.WrapContents = false;
+            lblCmaxRR.Text = "Cmax: " + cmax;
+            lblEsperaRR.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
+            lblRespuestaRR.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+        }
+
         private void flpTablaLJF_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (flpTabla.SelectedIndex == 1)
@@ -290,9 +347,15 @@ namespace Evaluación_de_planificación_de_procesos
             {
                 if (!panelActivo[3])
                 {
-                    ordenarPorNumeroDeProceso();
-                    llenarTabla(ref flpTablaRR, tiempoProcesos);
-                    panelActivo[3] = true;
+                    Quantum ventana = new Quantum();
+                    if(ventana.ShowDialog(this) == DialogResult.OK)
+                    {
+                        MessageBox.Show("Hola mundo");
+                        ordenarPorNumeroDeProceso();
+                        llenarTabla(ref flpTablaRR, tiempoProcesos);
+                        calcularPromediosRR();
+                        panelActivo[3] = true;
+                    }
                 }
             }
         }
