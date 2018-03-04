@@ -7,11 +7,13 @@ namespace Evaluación_de_planificación_de_procesos
 {
     public partial class Form1 : Form
     {
+        private static Color[] coloresBotones = new Color[10] { Color.FromArgb(114, 112, 202), Color.FromArgb(234, 136, 48), Color.FromArgb(234, 66, 48), Color.FromArgb(30, 145, 133), Color.FromArgb(91, 211, 72), Color.FromArgb(194, 40, 116), Color.FromArgb(255, 235, 87), Color.FromArgb(56, 175, 203), Color.FromArgb(32, 126, 144), Color.FromArgb(223, 46, 70) };
         private List<Proceso> tiempoProcesos;
         private bool[] panelActivo;
         private int numProcesos;
         private int timeMax;
         public int Quantum;
+
 
         /// <summary>Clase que genera labels especiales para las tablas</summary>
         public class LabelTabla : Label
@@ -25,8 +27,9 @@ namespace Evaluación_de_planificación_de_procesos
             }
 
             //Labels para diagrmas de Gantt
-            public LabelTabla(Proceso proceso, int timeProcesa)
+            public LabelTabla(Proceso proceso, int timeProcesa, int color)
             {
+                this.BackColor = coloresBotones[color];
                 this.Size = new Size(40 * proceso.tiempoProcesamiento, 82);
                 this.Margin = new Padding(0);
                 this.BorderStyle = BorderStyle.FixedSingle;
@@ -40,9 +43,13 @@ namespace Evaluación_de_planificación_de_procesos
                 this.Controls.Add(new LabelTabla(timeProcesa, 40 * proceso.tiempoProcesamiento));
             }
 
-            //Para RoundRobin
-            public LabelTabla(int numProceso, int tiempoProcesamiento, int indice)
+            /// <summary>Crea un label para el diagrama de Gantt de Round Robin</summary>
+            /// <param name="numProceso">Número de proceso para mostrar en la etiqueta P1..Pn</param>
+            /// <param name="tiempoProcesamiento">Para calcular el tamaño de la etiqueta, normalmente es un Qunantum</param>
+            /// <param name="indice">Valor de la etiqueta mostrada en la parte superior</param>
+            public LabelTabla(int numProceso, int tiempoProcesamiento, int indice, int color)
             {
+                this.BackColor = coloresBotones[color];
                 this.Size = new Size(40 * tiempoProcesamiento, 82);
                 this.Margin = new Padding(0);
                 this.BorderStyle = BorderStyle.FixedSingle;
@@ -245,15 +252,15 @@ namespace Evaluación_de_planificación_de_procesos
 
                 if(panel == 0)
                 {
-                    flPanelGanttFCFS.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax));
+                    flPanelGanttFCFS.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax, i));
                 }
                 else if(panel == 1)
                 {
-                    flPanelGanttSJF.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax));
+                    flPanelGanttSJF.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax, i));
                 }
                 else
                 {
-                    flPanelGanttLJF.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax));
+                    flPanelGanttLJF.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax, i));
                 }
             }
 
@@ -286,39 +293,65 @@ namespace Evaluación_de_planificación_de_procesos
         private void calcularPromediosRR()
         {
             //Para recuperar los valores al final
-            Proceso[] listRoundRobin = tiempoProcesos.ToArray();
+            Proceso[] listRoundRobin = new Proceso[numProcesos];
+            respaldarLista(ref listRoundRobin);
+            Console.WriteLine(tiempoProcesos[0].tiempoProcesamiento);
+
+            int iteraciones = 0;
+            getNumeroDeVueltas(ref iteraciones);
+
             int totalEspera = 0;
             int totalRespuesta = 0;
             int cmax = 0;
             int indices = numProcesos;
 
-            for( int i = 0; i < numProcesos; i++ )
+            for( int i = 0; i < iteraciones; i++ )
             {
-                for( int j = 0; j < indices; j++ )
+                for( int j = 0; j < numProcesos; j++ )
                 {
-                    if (tiempoProcesos[j].tiempoProcesamiento> this.Quantum)
+                    if (listRoundRobin[j].tiempoProcesamiento > this.Quantum)
                     {
                         cmax += this.Quantum;
-                        LabelTabla labelRR = new LabelTabla(tiempoProcesos[j].numeroProceso, this.Quantum, cmax);
-                        tiempoProcesos[j].tiempoProcesamiento -= this.Quantum;
+                        LabelTabla labelRR = new LabelTabla(listRoundRobin[j].numeroProceso, this.Quantum, cmax, j);
+                        listRoundRobin[j].tiempoProcesamiento -= this.Quantum;
                         flPanelGanttRR.Controls.Add(labelRR);
                     }
-                    else
+                    else if(listRoundRobin[j].tiempoProcesamiento > 0)  //Igual o menor se deja en 0 su valor
                     {
-                        cmax += tiempoProcesos[j].tiempoProcesamiento;
-                        LabelTabla labelRR = new LabelTabla(tiempoProcesos[j].numeroProceso, tiempoProcesos[j].tiempoProcesamiento, cmax);
-                        tiempoProcesos.RemoveAt(j);
-                        indices--;
+                        cmax += listRoundRobin[j].tiempoProcesamiento;
+                        LabelTabla labelRR = new LabelTabla(listRoundRobin[j].numeroProceso, listRoundRobin[j].tiempoProcesamiento, cmax, j);
+                        listRoundRobin[j].tiempoProcesamiento = 0;
                         flPanelGanttRR.Controls.Add(labelRR);
                     }
                 }
-                indices = tiempoProcesos.Count;
             }
-            tiempoProcesos = new List<Proceso>(listRoundRobin);
+            Console.WriteLine(tiempoProcesos[0].tiempoProcesamiento);
             flPanelGanttRR.WrapContents = false;
             lblCmaxRR.Text = "Cmax: " + cmax;
             lblEsperaRR.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
             lblRespuestaRR.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+        }
+
+        private void respaldarLista(ref Proceso[] arreglo)
+        {
+            for(int i = 0; i < arreglo.Length; i++)
+            {
+                arreglo[i] = new Proceso(tiempoProcesos[i].numeroProceso, tiempoProcesos[i].tiempoProcesamiento);
+            }
+        }
+
+        /// <summary>Para Round Robin, obtiene el número de iteraciones que se deben dar para calcular el RounRobin con base al Quantum</summary>
+        private void getNumeroDeVueltas(ref int iteraciones)
+        {
+            int mayor = 0;
+            foreach(Proceso proceso in tiempoProcesos)
+            {
+                if (proceso.tiempoProcesamiento > mayor)
+                    mayor = proceso.tiempoProcesamiento;
+            }
+
+            iteraciones = mayor / this.Quantum + 1;
+            Console.WriteLine("Iteraciones totales = " + iteraciones);
         }
 
         private void flpTablaLJF_SelectedIndexChanged(object sender, EventArgs e)
@@ -350,7 +383,7 @@ namespace Evaluación_de_planificación_de_procesos
                     Quantum ventana = new Quantum();
                     if(ventana.ShowDialog(this) == DialogResult.OK)
                     {
-                        MessageBox.Show("Hola mundo");
+                        lblQuantum.Text = "Quantum: " + this.Quantum;
                         ordenarPorNumeroDeProceso();
                         llenarTabla(ref flpTablaRR, tiempoProcesos);
                         calcularPromediosRR();
@@ -358,6 +391,14 @@ namespace Evaluación_de_planificación_de_procesos
                     }
                 }
             }
+        }
+
+
+        //Eliminar al final, para pruebas
+        private void button1_Click(object sender, EventArgs e)
+        {
+            int iteraciones = 11 / 10 + 1;
+            Console.WriteLine(iteraciones);
         }
     }
 }

@@ -73,6 +73,8 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblProcesos = new System.Windows.Forms.Label();
             this.btnGenerarProcesos = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.lblQuantum = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.udNumProcesos)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.udNumTimeMax)).BeginInit();
             this.flpTabla.SuspendLayout();
@@ -110,7 +112,7 @@
             // 
             this.udNumProcesos.Location = new System.Drawing.Point(79, 48);
             this.udNumProcesos.Maximum = new decimal(new int[] {
-            30,
+            10,
             0,
             0,
             0});
@@ -435,6 +437,7 @@
             // 
             // pageRR
             // 
+            this.pageRR.Controls.Add(this.lblQuantum);
             this.pageRR.Controls.Add(this.lblEsperaRR);
             this.pageRR.Controls.Add(this.lblRespuestaRR);
             this.pageRR.Controls.Add(this.lblCmaxRR);
@@ -561,11 +564,31 @@
             this.btnGenerarProcesos.UseVisualStyleBackColor = true;
             this.btnGenerarProcesos.Click += new System.EventHandler(this.btnGenerarProcesos_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(757, 48);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 8;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // lblQuantum
+            // 
+            this.lblQuantum.AutoSize = true;
+            this.lblQuantum.Location = new System.Drawing.Point(462, 65);
+            this.lblQuantum.Name = "lblQuantum";
+            this.lblQuantum.Size = new System.Drawing.Size(79, 20);
+            this.lblQuantum.TabIndex = 10;
+            this.lblQuantum.Text = "Quantum:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1191, 640);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnGenerarProcesos);
             this.Controls.Add(this.gpProcesos);
             this.Controls.Add(this.flpTabla);
@@ -649,6 +672,8 @@
         private System.Windows.Forms.Label lblRespuestaRR;
         private System.Windows.Forms.Label lblCmaxRR;
         private System.Windows.Forms.FlowLayoutPanel flPanelGanttRR;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label lblQuantum;
     }
 }
 
