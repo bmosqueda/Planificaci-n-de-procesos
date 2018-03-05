@@ -37,23 +37,30 @@ namespace Evaluación_de_planificación_de_procesos
         private List<Proceso> tiempoProcesos;
         private bool[] panelActivo;
         private int numProcesos;
-        private int timeMax;
-        public int Quantum;
 
+        //Sólo para Round Robin
+        public int Quantum;
+        //Se usa para determinar el número de iteraciones al calcular lo de Round Robin
+        private int timeMax;
 
         /// <summary>Clase que genera labels especiales para las tablas</summary>
-        public class LabelTabla : Label
+        public class LabelsEspeciales : Label
         {
-            public LabelTabla(int num)
+            /// <summary>Crea una instancia de una etiqueta con el formato para la tabla</summary>
+            /// <param name="num">Número de proceso para que quede de la forma P1,...,Pn</param>
+            public LabelsEspeciales(int numProceso)
             {
                 this.Size = new Size(125, 50);
                 this.BorderStyle = BorderStyle.Fixed3D;
                 this.TextAlign = ContentAlignment.MiddleCenter;
-                this.Text = num.ToString();
+                this.Text = numProceso.ToString();
             }
 
-            //Labels para diagrmas de Gantt
-            public LabelTabla(Proceso proceso, int timeProcesa, int color)
+            /// <summary>Crea una instancia para hacer una etiqueta con el formato del diagrama de Gantt en FCFS, SJF y LJF</summary>
+            /// <param name="proceso"></param>
+            /// <param name="timeProcesa"></param>
+            /// <param name="color"></param>
+            public LabelsEspeciales(Proceso proceso, int timeProcesa, int color)
             {
                 this.BackColor = colores[color];
                 this.Size = new Size(40 * proceso.tiempoProcesamiento, 82);
@@ -64,16 +71,16 @@ namespace Evaluación_de_planificación_de_procesos
                 this.Margin = new Padding(0,10,0,0);
 
                 ToolTip message = new ToolTip();
-                message.SetToolTip(this, "Tiempo total procesamiento = " + proceso.tiempoProcesamiento);
+                message.SetToolTip(this, "Tiempo procesamiento = " + proceso.tiempoProcesamiento);
 
-                this.Controls.Add(new LabelTabla(timeProcesa, 40 * proceso.tiempoProcesamiento));
+                this.Controls.Add(new LabelsEspeciales(timeProcesa, 40 * proceso.tiempoProcesamiento));
             }
 
-            /// <summary>Crea un label para el diagrama de Gantt de Round Robin</summary>
+            /// <summary>Crea una instancia para el diagrama de Gantt de Round Robin</summary>
             /// <param name="numProceso">Número de proceso para mostrar en la etiqueta P1..Pn</param>
             /// <param name="tiempoProcesamiento">Para calcular el tamaño de la etiqueta, normalmente es un Qunantum</param>
             /// <param name="indice">Valor de la etiqueta mostrada en la parte superior</param>
-            public LabelTabla(int numProceso, int tiempoProcesamiento, int indice, int color)
+            public LabelsEspeciales(int numProceso, int tiempoProcesamiento, int indice, int color)
             {
                 this.BackColor = colores[color];
                 this.Size = new Size(40 * tiempoProcesamiento, 82);
@@ -83,14 +90,16 @@ namespace Evaluación_de_planificación_de_procesos
                 this.Text = "P" + numProceso;
                 this.Margin = new Padding(0, 10, 0, 0);
 
-                //ToolTip message = new ToolTip();
-                //message.SetToolTip(this, "Tiempo total procesamiento = " + proceso);
+                ToolTip message = new ToolTip();
+                message.SetToolTip(this, "Tiempo procesamiento = " + tiempoProcesamiento);
 
-                this.Controls.Add(new LabelTabla(indice, 40 * tiempoProcesamiento));
+                this.Controls.Add(new LabelsEspeciales(indice, 40 * tiempoProcesamiento));
             }
 
-            //Label de subíndice dentro de los Labels de procesos del diagrama de Gantt
-            private LabelTabla(int tiempo, int width)
+            /// <summary>Crea una instancia de subíndice dentro de los Labels de procesos del diagrama de Gantt</summary>
+            /// <param name="tiempo"></param>
+            /// <param name="width">El mismo que la etiqueta "padre"</param>
+            private LabelsEspeciales(int tiempo, int width)
             {
                 this.Font = new Font("Microsoft Office Preview Font", 9);
                 this.Text = tiempo.ToString();
@@ -149,6 +158,7 @@ namespace Evaluación_de_planificación_de_procesos
 
                 Random aleatorio = new Random();
                 lblProcesos.Text = "|   ";
+                //Se limpia la lista que guarda todos los procesos anteriores
                 tiempoProcesos.Clear();
 
                 for (int i = 0; i < numProcesos; i++)
@@ -158,10 +168,10 @@ namespace Evaluación_de_planificación_de_procesos
                     tiempoProcesos.Add(proceso);
                     lblProcesos.Text += "P" + (i + 1) + " = " + num + "   |   ";
 
-                    LabelTabla labelProceso = new LabelTabla(i + 1);
+                    LabelsEspeciales labelProceso = new LabelsEspeciales(i + 1);
                     flPanelTablaFCFS.Controls.Add(labelProceso);
 
-                    LabelTabla labelTiempo = new LabelTabla(num);
+                    LabelsEspeciales labelTiempo = new LabelsEspeciales(num);
                     flPanelTablaFCFS.Controls.Add(labelTiempo);
 
                     if (i % 2 == 0)
@@ -170,6 +180,7 @@ namespace Evaluación_de_planificación_de_procesos
                         labelTiempo.BackColor = Color.FromArgb(96, 192, 205);
                     }
                 }
+                //Se limpian todos los paneles de diagramas de Gantt
                 flPanelGanttFCFS.Controls.Clear();
                 flPanelGanttSJF.Controls.Clear();
                 flPanelGanttLJF.Controls.Clear();
@@ -193,10 +204,10 @@ namespace Evaluación_de_planificación_de_procesos
         {
             for (int i = 0; i < numProcesos; i++)
             {
-                LabelTabla labelProceso = new LabelTabla(procesos[i].numeroProceso);
+                LabelsEspeciales labelProceso = new LabelsEspeciales(procesos[i].numeroProceso);
                 contenedorTabla.Controls.Add(labelProceso);
 
-                LabelTabla labelTiempo = new LabelTabla(procesos[i].tiempoProcesamiento);
+                LabelsEspeciales labelTiempo = new LabelsEspeciales(procesos[i].tiempoProcesamiento);
                 contenedorTabla.Controls.Add(labelTiempo);
 
                 if (i % 2 == 0)
@@ -207,6 +218,7 @@ namespace Evaluación_de_planificación_de_procesos
             }
         }
 
+        //Para Short Job First
         public void ordenarProceosMenorAMayor()
         {
             for( int i = 0; i < numProcesos - 1; i++ )
@@ -223,6 +235,7 @@ namespace Evaluación_de_planificación_de_procesos
             }
         }
 
+        //Para Largest Job First
         public void ordenarProceosMayorAMenor()
         {
             for (int i = 0; i < numProcesos - 1; i++)
@@ -278,15 +291,15 @@ namespace Evaluación_de_planificación_de_procesos
 
                 if(panel == 0)
                 {
-                    flPanelGanttFCFS.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax, i));
+                    flPanelGanttFCFS.Controls.Add(new LabelsEspeciales(tiempoProcesos[i], cmax, i));
                 }
                 else if(panel == 1)
                 {
-                    flPanelGanttSJF.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax, i));
+                    flPanelGanttSJF.Controls.Add(new LabelsEspeciales(tiempoProcesos[i], cmax, i));
                 }
                 else
                 {
-                    flPanelGanttLJF.Controls.Add(new LabelTabla(tiempoProcesos[i], cmax, i));
+                    flPanelGanttLJF.Controls.Add(new LabelsEspeciales(tiempoProcesos[i], cmax, i));
                 }
             }
 
@@ -345,7 +358,7 @@ namespace Evaluación_de_planificación_de_procesos
                         cmax += this.Quantum;
                         esperaRespuesta[2, j] = cmax;
 
-                        LabelTabla labelRR = new LabelTabla(listRoundRobin[j].numeroProceso, this.Quantum, cmax, j);
+                        LabelsEspeciales labelRR = new LabelsEspeciales(listRoundRobin[j].numeroProceso, this.Quantum, cmax, j);
                         listRoundRobin[j].tiempoProcesamiento -= this.Quantum;
                         flPanelGanttRR.Controls.Add(labelRR);
                     }
@@ -358,7 +371,7 @@ namespace Evaluación_de_planificación_de_procesos
                         //Llegados a este punto será la última instancia, cuando ya acabó el proceso, ya no se ejecutará otra vez
                         esperaRespuesta[1, j] = cmax;
 
-                        LabelTabla labelRR = new LabelTabla(listRoundRobin[j].numeroProceso, listRoundRobin[j].tiempoProcesamiento, cmax, j);
+                        LabelsEspeciales labelRR = new LabelsEspeciales(listRoundRobin[j].numeroProceso, listRoundRobin[j].tiempoProcesamiento, cmax, j);
                         listRoundRobin[j].tiempoProcesamiento = 0;
                         flPanelGanttRR.Controls.Add(labelRR);
                     }
