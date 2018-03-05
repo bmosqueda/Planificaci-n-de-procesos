@@ -7,7 +7,33 @@ namespace Evaluación_de_planificación_de_procesos
 {
     public partial class Form1 : Form
     {
-        private static Color[] coloresBotones = new Color[10] { Color.FromArgb(114, 112, 202), Color.FromArgb(234, 136, 48), Color.FromArgb(234, 66, 48), Color.FromArgb(30, 145, 133), Color.FromArgb(91, 211, 72), Color.FromArgb(194, 40, 116), Color.FromArgb(255, 235, 87), Color.FromArgb(56, 175, 203), Color.FromArgb(32, 126, 144), Color.FromArgb(223, 46, 70) };
+        private static Color[] colores = new Color[24]
+        {
+            Color.FromArgb(72, 201, 176),
+            Color.FromArgb(187, 143, 206),
+            Color.FromArgb(229, 152, 102),
+            Color.FromArgb(93, 173, 226),
+            Color.FromArgb(244, 208, 63),
+            Color.FromArgb(236, 112, 99),
+            Color.FromArgb(166, 172, 175),
+            Color.FromArgb(255, 160, 122),
+            Color.FromArgb(255, 0, 0),
+            Color.FromArgb(255,255,0),
+            Color.FromArgb(255,255,255),
+            Color.FromArgb(0,255,0),
+            Color.FromArgb(0,255,255),
+            Color.FromArgb(255,0,255),
+            Color.FromArgb(114, 112, 202),
+            Color.FromArgb(234, 136, 48),
+            Color.FromArgb(234, 66, 48),
+            Color.FromArgb(30, 145, 133),
+            Color.FromArgb(91, 211, 72),
+            Color.FromArgb(194, 40, 116),
+            Color.FromArgb(255, 235, 87),
+            Color.FromArgb(56, 175, 203),
+            Color.FromArgb(32, 126, 144),
+            Color.FromArgb(223, 46, 70)
+        };
         private List<Proceso> tiempoProcesos;
         private bool[] panelActivo;
         private int numProcesos;
@@ -29,7 +55,7 @@ namespace Evaluación_de_planificación_de_procesos
             //Labels para diagrmas de Gantt
             public LabelTabla(Proceso proceso, int timeProcesa, int color)
             {
-                this.BackColor = coloresBotones[color];
+                this.BackColor = colores[color];
                 this.Size = new Size(40 * proceso.tiempoProcesamiento, 82);
                 this.Margin = new Padding(0);
                 this.BorderStyle = BorderStyle.FixedSingle;
@@ -49,7 +75,7 @@ namespace Evaluación_de_planificación_de_procesos
             /// <param name="indice">Valor de la etiqueta mostrada en la parte superior</param>
             public LabelTabla(int numProceso, int tiempoProcesamiento, int indice, int color)
             {
-                this.BackColor = coloresBotones[color];
+                this.BackColor = colores[color];
                 this.Size = new Size(40 * tiempoProcesamiento, 82);
                 this.Margin = new Padding(0);
                 this.BorderStyle = BorderStyle.FixedSingle;
@@ -269,24 +295,24 @@ namespace Evaluación_de_planificación_de_procesos
                 //Para hacer que se active el scroll horizontal en lugar de que crezca el panel a lo alto
                 flPanelGanttFCFS.WrapContents = false;
                 lblCmax.Text = "Cmax: " + cmax;
-                lblPromEspera.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
-                lblPromRespuesta.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+                lblPromEspera.Text = "Promedio espera: " + Math.Round(((double)totalEspera / numProcesos),4);
+                lblPromRespuesta.Text = "Promedio respuesta: " + Math.Round(((double)totalRespuesta / numProcesos),4);
             }
             else if (panel == 1)
             {
                 //Para hacer que se active el scroll horizontal en lugar de que crezca el panel a lo alto
                 flPanelGanttSJF.WrapContents = false;
                 lblCmaxSJF.Text = "Cmax: " + cmax;
-                lblEsperaSJF.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
-                lblRespuestaSJF.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+                lblEsperaSJF.Text = "Promedio espera: " + Math.Round(((double)totalEspera / numProcesos),4);
+                lblRespuestaSJF.Text = "Promedio respuesta: " + Math.Round(((double)totalRespuesta / numProcesos),4);
             }
             else
             {
                 //Para hacer que se active el scroll horizontal en lugar de que crezca el panel a lo alto
                 flPanelGanttLJF.WrapContents = false;
                 lblCmaxLJF.Text = "Cmax: " + cmax;
-                lblEsperaLJF.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
-                lblRespuestaLJF.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+                lblEsperaLJF.Text = "Promedio espera: " + Math.Round(((double)totalEspera / numProcesos),4);
+                lblRespuestaLJF.Text = "Promedio respuesta: " + Math.Round(((double)totalRespuesta / numProcesos),4);
             }
         }
 
@@ -296,6 +322,9 @@ namespace Evaluación_de_planificación_de_procesos
             Proceso[] listRoundRobin = new Proceso[numProcesos];
             respaldarLista(ref listRoundRobin);
             Console.WriteLine(tiempoProcesos[0].tiempoProcesamiento);
+
+            //matriz de sumas de espera y respuesta, indice 0 en las filas es para espera, 1 para respuesta y el 2 para el valor anteterior con el que se calculará la espera
+            int[,] esperaRespuesta = new int[3, numProcesos];
 
             int iteraciones = 0;
             getNumeroDeVueltas(ref iteraciones);
@@ -311,14 +340,24 @@ namespace Evaluación_de_planificación_de_procesos
                 {
                     if (listRoundRobin[j].tiempoProcesamiento > this.Quantum)
                     {
+                        //Cada que entre 
+                        esperaRespuesta[0, j] += cmax - esperaRespuesta[2, j];
                         cmax += this.Quantum;
+                        esperaRespuesta[2, j] = cmax;
+
                         LabelTabla labelRR = new LabelTabla(listRoundRobin[j].numeroProceso, this.Quantum, cmax, j);
                         listRoundRobin[j].tiempoProcesamiento -= this.Quantum;
                         flPanelGanttRR.Controls.Add(labelRR);
                     }
                     else if(listRoundRobin[j].tiempoProcesamiento > 0)  //Igual o menor se deja en 0 su valor
                     {
+                        esperaRespuesta[0, j] += cmax - esperaRespuesta[2, j];
                         cmax += listRoundRobin[j].tiempoProcesamiento;
+
+
+                        //Llegados a este punto será la última instancia, cuando ya acabó el proceso, ya no se ejecutará otra vez
+                        esperaRespuesta[1, j] = cmax;
+
                         LabelTabla labelRR = new LabelTabla(listRoundRobin[j].numeroProceso, listRoundRobin[j].tiempoProcesamiento, cmax, j);
                         listRoundRobin[j].tiempoProcesamiento = 0;
                         flPanelGanttRR.Controls.Add(labelRR);
@@ -327,9 +366,24 @@ namespace Evaluación_de_planificación_de_procesos
             }
             Console.WriteLine(tiempoProcesos[0].tiempoProcesamiento);
             flPanelGanttRR.WrapContents = false;
+
+            calcularTotalEsperaRespuesta(ref totalEspera, ref totalRespuesta, esperaRespuesta);
+            
             lblCmaxRR.Text = "Cmax: " + cmax;
-            lblEsperaRR.Text = "Promedio espera: " + ((double)totalEspera / numProcesos);
-            lblRespuestaRR.Text = "Promedio respuesta: " + ((double)totalRespuesta / numProcesos);
+            lblEsperaRR.Text = "Promedio espera: " + Math.Round(((double)totalEspera / numProcesos), 4);
+            lblRespuestaRR.Text = "Promedio respuesta: " + Math.Round(((double)totalRespuesta / numProcesos),4);
+        }
+
+        private void calcularTotalEsperaRespuesta(ref int totalEspera, ref int totalRespuesta, int[,] esperaRespuesta)
+        {
+            //No se toma en cuenta la tercer fila
+            for(int j = 0; j < numProcesos; j++)
+            {
+                totalEspera += esperaRespuesta[0, j];
+                totalRespuesta += esperaRespuesta[1, j];
+            }
+            Console.WriteLine("Suma total espera:" + totalEspera);
+            Console.WriteLine("Suma total respuesta:" + totalRespuesta);
         }
 
         private void respaldarLista(ref Proceso[] arreglo)
@@ -393,12 +447,5 @@ namespace Evaluación_de_planificación_de_procesos
             }
         }
 
-
-        //Eliminar al final, para pruebas
-        private void button1_Click(object sender, EventArgs e)
-        {
-            int iteraciones = 11 / 10 + 1;
-            Console.WriteLine(iteraciones);
-        }
     }
 }
